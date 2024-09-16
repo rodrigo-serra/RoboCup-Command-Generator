@@ -1,0 +1,29 @@
+# HRI and people perception commands
+person_cmd_list: 
+  - "goToLoc"
+  - "findPrsInRoom"
+  - "meetPrsAtBeac"
+  - "countPrsInRoom"
+  - "tellPrsInfoInLoc"
+  - "talkInfoToGestPrsInRoom"
+  - "answerToGestPrsInRoom"
+  - "followNameFromBeacToRoom"
+  - "guideNameFromBeacToBeac"
+  - "guidePrsFromBeacToBeac"
+  - "guideClothPrsFromBeacToBeac"
+  - "greetClothDscInRm"
+  - "greetNameInRm"
+  - "meetNameAtLocThenFindInRm"
+  - "countClothPrsInRoom"
+  - "tellPrsInfoAtLocToPrsAtLoc"
+  - "followPrsAtLoc"
+
+# Object manipulation and perception commands
+object_cmd_list: 
+  - "goToLoc"
+  - "takeObjFromPlcmt"
+  - "findObjInRoom"
+  - "countObjOnPlcmt"
+  - "tellObjPropOnPlcmt"
+  - "bringMeObjFromPlcmt"
+  - "tellCatPropOnPlcmt"

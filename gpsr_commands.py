@@ -2,12 +2,13 @@ import random
 import re
 import itertools
 import warnings
-
+from utils.utils import *
 
 class CommandGenerator:
 
     def __init__(self, person_names, location_names, placement_location_names, room_names, object_names,
                  object_categories_plural, object_categories_singular):
+        
         self.person_names = person_names
         self.location_names = location_names
         self.placement_location_names = placement_location_names
@@ -16,85 +17,53 @@ class CommandGenerator:
         self.object_categories_plural = object_categories_plural
         self.object_categories_singular = object_categories_singular
 
-    verb_dict = {
-        "take": ["take", "get", "grasp", "fetch"],
-        "place": ["put", "place"],
-        "deliver": ["bring", "give", "deliver"],
-        "bring": ["bring", "give"],
-        "go": ["go", "navigate"],
-        "find": ["find", "locate", "look for"],
-        "talk": ["tell", "say"],
-        "answer": ["answer"],
-        "meet": ["meet"],
-        "tell": ["tell"],
-        "greet": ["greet", "salute", "say hello to", "introduce yourself to"],
-        "remember": ["meet", "contact", "get to know", "get acquainted with"],
-        "count": ["tell me how many"],
-        "describe": ["tell me how", "describe"],
-        "offer": ["offer"],
-        "follow": ["follow"],
-        "guide": ["guide", "escort", "take", "lead"],
-        "accompany": ["accompany"]
-    }
+    
+        ######################################################################
+        # LOAD GRAMMAR
+        # (verbs, connectors, gestures pose list,...)
+        ######################################################################
+        grammar_data_file_path = './params/grammar.yaml'
+        grammar_data = read_yaml_file(file_path=grammar_data_file_path)
 
-    prep_dict = {
-        "deliverPrep": ["to"],
-        "placePrep": ["on"],
-        "inLocPrep": ["in"],
-        "fromLocPrep": ["from"],
-        "toLocPrep": ["to"],
-        "atLocPrep": ["at"],
-        "talkPrep": ["to"],
-        "locPrep": ["in", "at"],
-        "onLocPrep": ["on"],
-        "arePrep": ["are"],
-        "ofPrsPrep": ["of"]
-    }
+        # Accessing the loaded data
+        self.verb_dict = grammar_data['verb_dict']
+        self.prep_dict = grammar_data['prep_dict']
+        self.connector_list = grammar_data['connector_list']
+        self.gesture_person_list = grammar_data['gesture_person_list']
+        self.pose_person_list = grammar_data['pose_person_list']
+        self.gesture_person_plural_list = grammar_data['gesture_person_plural_list']
+        self.pose_person_plural_list = grammar_data['pose_person_plural_list']
+        self.person_info_list = grammar_data['person_info_list']
+        self.object_comp_list = grammar_data['object_comp_list']
+        self.talk_list = grammar_data['talk_list']
+        self.question_list = grammar_data['question_list']
+        self.color_list = grammar_data['color_list']
+        self.clothe_list = grammar_data['clothe_list']
+        self.clothes_list = grammar_data['clothes_list']
+        self.color_clothe_list = grammar_data['color_clothe_list']
 
-    connector_list = ["and"]
-    gesture_person_list = ["waving person", "person raising their left arm", "person raising their right arm",
-                           "person pointing to the left", "person pointing to the right"]
-    pose_person_list = ["sitting person", "standing person", "lying person"]
-    # Ugly...
-    gesture_person_plural_list = ["waving persons", "persons raising their left arm", "persons raising their right arm",
-                                  "persons pointing to the left", "persons pointing to the right"]
-    pose_person_plural_list = ["sitting persons", "standing persons", "lying persons"]
+        # Initialize color clothing combinations
+        self.color_clothe_list = [a + " " + b for a, b in itertools.product(self.color_list, self.clothe_list)]
+        self.color_clothes_list = [a + " " + b for a, b in itertools.product(self.color_list, self.clothes_list)]
 
-    person_info_list = ["name", "pose", "gesture"]
-    object_comp_list = ["biggest", "largest", "smallest", "heaviest", "lightest", "thinnest"]
-
-    talk_list = ["something about yourself", "the time", "what day is today", "what day is tomorrow", "your teams name",
-                 "your teams country", "your teams affiliation", "the day of the week", "the day of the month"]
-    question_list = ["question", "quiz"]
-
-    color_list = ["blue", "yellow", "black", "white", "red", "orange", "gray"]
-    clothe_list = ["t shirt", "shirt", "blouse", "sweater", "coat", "jacket"]
-    clothes_list = ["t shirts", "shirts", "blouses", "sweaters", "coats", "jackets"]
-    color_clothe_list = []
-    for (a, b) in list(itertools.product(color_list, clothe_list)):
-        color_clothe_list = color_clothe_list + [a + " " + b]
-    color_clothes_list = []
-    for (a, b) in list(itertools.product(color_list, clothes_list)):
-        color_clothes_list = color_clothes_list + [a + " " + b]
-
+        
+    
     def generate_command_start(self, cmd_category="", difficulty=0):
         cmd_list = []
-        # cmd_list = ["goToLoc", "takeObjFromPlcmt", "findPrsInRoom", "findObjInRoom", "meetPrsAtBeac", "countObjOnPlcmt",
-        #             "countPrsInRoom", "tellPrsInfoInLoc", "tellObjPropOnPlcmt", "talkInfoToGestPrsInRoom",
-        #             "answerToGestPrsInRoom", "followNameFromBeacToRoom", "guideNameFromBeacToBeac",
-        #             "guidePrsFromBeacToBeac", "guideClothPrsFromBeacToBeac", "bringMeObjFromPlcmt",
-        #             "tellCatPropOnPlcmt", "greetClothDscInRm", "greetNameInRm", "meetNameAtLocThenFindInRm",
-        #             "countClothPrsInRoom", "countClothPrsInRoom", "tellPrsInfoAtLocToPrsAtLoc", "followPrsAtLoc"]
-
+       
+        ######################################################################
+        # LOAD COMMANDS
+        # ()
+        ######################################################################
+        cmd_data_file_path = './params/commands.yaml'
+        cmd_data = read_yaml_file(file_path=cmd_data_file_path)
+        
         # HRI and people perception commands
-        person_cmd_list = ["goToLoc", "findPrsInRoom", "meetPrsAtBeac", "countPrsInRoom", "tellPrsInfoInLoc",
-                           "talkInfoToGestPrsInRoom", "answerToGestPrsInRoom", "followNameFromBeacToRoom",
-                           "guideNameFromBeacToBeac", "guidePrsFromBeacToBeac", "guideClothPrsFromBeacToBeac",
-                           "greetClothDscInRm", "greetNameInRm", "meetNameAtLocThenFindInRm", "countClothPrsInRoom",
-                           "countClothPrsInRoom", "tellPrsInfoAtLocToPrsAtLoc", "followPrsAtLoc"]
+        person_cmd_list = save_parameters(cmd_data, "person_cmd_list")
+
         # Object manipulation and perception commands
-        object_cmd_list = ["goToLoc", "takeObjFromPlcmt", "findObjInRoom", "countObjOnPlcmt", "tellObjPropOnPlcmt",
-                           "bringMeObjFromPlcmt", "tellCatPropOnPlcmt"]
+        object_cmd_list = save_parameters(cmd_data, "object_cmd_list")
+
 
         if cmd_category == "people":
             cmd_list = person_cmd_list
@@ -164,12 +133,15 @@ class CommandGenerator:
         else:
             warnings.warn("Command type not covered: " + command)
             return "WARNING"
-
+        
+        print(command_string)
         for ph in re.findall(r'(\{\w+\})', command_string, re.DOTALL):
+            print(ph)
             command_string = command_string.replace(ph, self.insert_placeholders(ph))
 
         # TODO allow multiple articles
         art_ph = re.findall(r'\{(art)\}\s*([A-Za-z])', command_string, re.DOTALL)
+
         if art_ph:
             command_string = command_string.replace("art",
                                                     "an" if art_ph[0][1].lower() in ["a", "e", "i", "o", "u"] else "a")
@@ -222,7 +194,7 @@ class CommandGenerator:
         elif command == "deliverObjToNameAtBeac":
             command_string = "{deliverVerb} it {deliverPrep} {name} {inLocPrep} the {room}"
         elif command == "talkInfo":
-            command_string = "{talkVerb} {talk}}"
+            command_string = "{talkVerb} {talk}"
         elif command == "answerQuestion":
             command_string = "{answerVerb} a {question}"
         elif command == "followPrs":
@@ -243,6 +215,9 @@ class CommandGenerator:
         ph = ph.replace('{', '').replace('}', '')
         if len(ph.split('_')) > 1:
             ph = random.choice(ph.split('_'))
+        
+        print(ph)
+
         if ph == "goVerb":
             return random.choice(self.verb_dict["go"])
         elif ph == "takeVerb":
