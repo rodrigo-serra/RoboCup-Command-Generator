@@ -4,4 +4,5 @@
 - Execute `python generator.py`
 - Follow instructions
 
-For example files see: https://github.com/johaq/CompetitionTemplate
+This repo is an optimized and cleanup version of the command generator provided by https://github.com/johaq/
+
